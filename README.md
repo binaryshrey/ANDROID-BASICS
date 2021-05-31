@@ -1,6 +1,81 @@
 # ANDROID-BASICS
 
-I. TESTING
+I. FIREBASE
+
+A. FCM - Notifications
+	
+1. add Firebase to project
+2. add service to manifest file
+    
+```
+<service 
+    android:name=".MyFirebaseMessagingService" 
+    android:exported="false"> 
+    <intent-filter> 
+        <action android:name="com.google.firebase.MESSAGING_EVENT"/> 
+    </intent-filter> 
+</service>
+```
+
+3. create new channel in the fragment
+```
+createChannel( 
+        getString(R.string.breakfast_notification_channel_id), 
+        getString(R.string.breakfast_notification_channel_name) 
+    )
+```
+
+4. create new class that extends FirebaseMessagingService
+```
+class MyFirebaseMessagingService : FirebaseMessagingService() {
+
+override fun onNewToken(token: String?) { 
+        Log.d(TAG, "Refreshed token: $token") 
+        sendRegistrationToServer(token) 
+    }
+}
+
+private fun sendRegistrationToServer(token: String?) { 
+        // TODO: Implement this method to send token to your app server. 
+    }
+
+override fun onMessageReceived(remoteMessage: RemoteMessage?) { 
+        Log.d(TAG, "From: ${remoteMessage?.from}") 
+        remoteMessage?.data?.let { 
+            Log.d(TAG, "Message data payload: " + remoteMessage.data) 
+        } 
+        remoteMessage?.notification?.let { 
+            Log.d(TAG, "Message Notification Body: ${it.body}") 
+            sendNotification(it.body!!) 
+        } 
+    }
+
+private fun sendNotification(messageBody: String) { 
+        val notificationManager = ContextCompat.getSystemService(applicationContext,NotificationManager::class.java) as NotificationManager 
+        notificationManager.sendNotification(messageBody, applicationContext) 
+    }
+```
+
+
+5. Subsribe to a TOPIC via fragment
+```
+private fun subscribeTopic() { 
+       
+        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC) 
+            .addOnCompleteListener { task -> 
+                var message = getString(R.string.message_subscribed) 
+                if (!task.isSuccessful) { 
+                    message = getString(R.string.message_subscribe_failed) 
+                } 
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show() 
+            } 
+    }
+```
+
+
+
+
+II. TESTING
 
 https://developer.android.com/training/testing/fundamentals
 
